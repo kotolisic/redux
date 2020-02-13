@@ -20,6 +20,9 @@ reg  [7:0]  i_data  = 8'hFF;
 reg  [7:0]  i_data_ = 8'hFF;
 wire [7:0]  o_data;
 wire        o_we;
+wire [7:0]  reg_n;
+wire [31:0] reg_i;
+wire [31:0] reg_o;
 
 // Чтение и запись в память
 always @(posedge clock) begin
@@ -41,7 +44,10 @@ redux ucpu
     .address(o_address),
     .din    (i_data),
     .dout   (o_data),
-    .we     (o_we)
+    .we     (o_we),
+    .reg_n  (reg_n),
+    .reg_i  (reg_i),
+    .reg_o  (reg_o)
 );
 
 endmodule
