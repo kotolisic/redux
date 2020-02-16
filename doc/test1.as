@@ -58,3 +58,24 @@ REP:    d.str [r0]
 _nosign:
         .. setflag
 
+; ----------------------------------------------------------------------
+        ; r0/r1 -> r0/r2
+
+        ; r3 | r0
+
+        b.lda #0
+        d.sta [r3]
+        d.sta [r2]
+
+        d.lda [r0]
+        d.shl #1
+        d.sta [r0]
+        b.bnc @next
+        
+
+@next:
+        
+
+
+        
+        
