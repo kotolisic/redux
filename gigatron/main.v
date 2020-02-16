@@ -2,6 +2,10 @@
 
 module main;
 
+// c17c
+// ----
+// 110 000 01 op=6, mode=0, bus=1
+
 // ---------------------------------------------------------------------
 reg clock;  always #0.5 clock   = ~clock;
 reg clock6; always #2.0 clock6  = ~clock6; // 6.25 Mhz
@@ -29,14 +33,33 @@ always @(posedge clock) begin
 end
 
 // ---------------------------------------------------------------------
+wire [7:0]  inreg;
+wire [14:0] r_addr;
+wire [14:0] w_addr;
+wire [ 7:0] i_data;
+wire [ 7:0] o_data;
+wire [ 7:0] outx;
+wire [ 7:0] vga;
+
 gigatron u1
 (
+    // Исполнение программы
     .clock  (clock6),
     .rst_n  (1'b1),
     .pc     (address_pc),
-    .ir     (data_ir)
+    .ir     (data_ir),
 
-    // ....
+    // Чтение и запись
+    .r_addr (r_addr),
+    .w_addr (w_addr),
+    .i_data (i_data),
+    .o_data (o_data),
+    .o_we   (o_we),
+
+    // Ввод-вывода
+    .inreg  (inreg),
+    .vga    (vga),
+    .outx   (outx)
 );
 
 endmodule

@@ -1,5 +1,6 @@
-/*
- * Процессор, основанный на анализе и повторе js-эмулятора Gigatron
+/**
+ * @desc Процессор, основанный на анализе и повторе js-эмулятора Gigatron
+ * @url  https://gigatron.io/
  */
 
 module gigatron
@@ -20,34 +21,42 @@ module gigatron
 
     // Порты ввода-вывода
     input   wire [ 7:0] inreg,
-    output  reg  [ 7:0] out,
-    output  reg  [ 7:0] outx
+    output  reg  [ 7:0] vga,
+    output  reg  [ 7:0] outx,
+
+    // 76543210
+    // ^^^^^^^^
+    // |||||||`-- SCLK
+    // ||||||`--- Not connected
+    // |||||`---- /SS0
+    // ||||`----- /SS1
+    // |||`------ /SS2
+    // ||`------- /SS3
+    // |`-------- B0
+    // `--------- B1 (Memory Bank)
+    output  reg  [ 7:0] ctrl
 );
 
 // Регистры
-reg  [ 7:0] ac   = 0;
-reg  [ 7:0] x    = 0;
-reg  [ 7:0] y    = 0;
+reg  [ 7:0] ac      = 0;
+reg  [ 7:0] x       = 0;
+reg  [ 7:0] y       = 0;
+reg  [15:0] nextpc  = 1;
 
-initial begin pc = 0; out = 0; outx = 0; end
+initial begin pc = 0; vga = 0; outx = 0; ctrl = 0; end
 
-wire [ 7:0] op   = ir[15:13]; // 3
-wire [ 7:0] mode = ir[12:10]; // 3
-wire [ 7:0] bus  = ir[ 9:8];  // 2
-wire [ 7:0] d    = ir[ 7:0];  // 8
-wire [ 7:0] zac  = {~ac[7], ac[6:0]};
-
-// ---------------------------------------
-
-reg  [ 7:0] b; // Значение на BUS
+// Вычисления
+// ---------------------------------------------------------------------
+reg  [ 7:0] b;
 reg  [ 7:0] alu;
-reg         cond;
 reg  [ 7:0] base;
+reg         cond;
 
 // Комбинационная логика
+// ---------------------------------------------------------------------
 always @* begin
 
-    base = pc[15:7];
+    base = pcinc[15:8];
 
     // Режим ZeroPage для branchOp
     if (op == 7) r_addr = d;
@@ -64,10 +73,10 @@ always @* begin
     // Выборка шины
     case (bus)
 
-        2'b00: b = d;
-        2'b01: b = i_data;
-        2'b10: b = ac;
-        2'b11: b = inreg;
+        /* IMM */ 2'b00: b = d;
+        /* MEM */ 2'b01: b = i_data;
+        /* ACC */ 2'b10: b = ac;
+        /* INP */ 2'b11: b = inreg;
 
     endcase
 
@@ -99,11 +108,22 @@ always @* begin
 
 end
 
+// Декодирование IR
+// ---------------------------------------------------------------------
+wire [ 7:0] op      = ir[15:13]; // 3
+wire [ 7:0] mode    = ir[12:10]; // 3
+wire [ 7:0] bus     = ir[ 9:8];  // 2
+wire [ 7:0] d       = ir[ 7:0];  // 8
+wire [ 7:0] zac     = {~ac[7], ac[6:0]};
+wire [15:0] pcinc   = nextpc + 1;
+
 // Основная логика
+// ---------------------------------------------------------------------
 always @(posedge clock) begin
 
-    pc   <= pc + 1;
-    o_we <= 0;
+    pc     <= nextpc;   // Переходим к следующему PC
+    nextpc <= pcinc;    // Инкремент (задержка 1 такт, конвейер)
+    o_we   <= 0;
 
     case (op)
 
@@ -122,10 +142,13 @@ always @(posedge clock) begin
 
             endcase
 
+            // Дополнительные конфигурации
+            if (bus == 1) ctrl <= b;
+
         end
 
         // brancOp
-        7: if (cond) pc <= {base, b};
+        7: if (cond) nextpc <= {base, b};
 
         // aluOp (0-5)
         default: case (mode)
@@ -137,20 +160,20 @@ always @(posedge clock) begin
             begin
 
                 // Инкремент X при особых условиях
-                if (mode == 7 && bus == 1)                
+                if (mode == 7 && bus == 1)
                     x <= x + 1;
 
-                // Запись содержимого AC на позитивном фронте
-                if (!out[6] && alu[6])
+                // Запись содержимого AC в OUTX @(posedge VGA_HS)
+                if (!vga[6] && alu[6])
                     outx <= ac;
 
                 // Запись в порт значения АЛУ
-                out <= alu;
+                vga <= alu;
 
             end
 
         endcase
-        
+
     endcase
 
 end
