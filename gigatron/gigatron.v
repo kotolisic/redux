@@ -1,11 +1,15 @@
-module gigatron(
+/*
+ * Процессор, основанный на анализе и повторе js-эмулятора Gigatron
+ */
 
+module gigatron
+(
     input   wire        clock,
     input   wire        rst_n,
     output  reg  [15:0] pc,
     input   wire [15:0] ir,
 
-    // Адрес для чтения 
+    // Адрес для чтения
     output  reg  [14:0] r_addr,
     input   wire [ 7:0] i_data,
 
@@ -36,7 +40,7 @@ wire [ 7:0] zac  = {~ac[7], ac[6:0]};
 // ---------------------------------------
 
 reg  [ 7:0] b; // Значение на BUS
-reg  [ 7:0] b_alu;
+reg  [ 7:0] alu;
 reg         cond;
 reg  [ 7:0] base;
 
@@ -45,16 +49,15 @@ always @* begin
 
     base = pc[15:7];
 
-    // Чтение из памяти по ZeroPage для branchOp
+    // Режим ZeroPage для branchOp
     if (op == 7) r_addr = d;
-    // Иначе зависит от режимов
     else case (mode)
 
-        4'h0, 4'h4, 4'h5, 4'h6: 
-                    r_addr = d;
-        4'h1:       r_addr = x;
-        4'h2:       r_addr = {y, d};
-        4'h3, 4'h7: r_addr = {y, x}; // bus=1, mode=7 => X++
+        0, 4, 5, 6:
+              r_addr = d;
+        1:    r_addr = x;
+        2:    r_addr = {y, d};
+        3, 7: r_addr = {y, x}; // bus=1, mode=7 => X++
 
     endcase
 
@@ -63,20 +66,20 @@ always @* begin
 
         2'b00: b = d;
         2'b01: b = i_data;
-        2'b10: b = ac; 
-        2'b11: b = inreg; 
+        2'b10: b = ac;
+        2'b11: b = inreg;
 
     endcase
 
     // Результат вычисления АЛУ
     case (op)
 
-        1: b_alu = ac & b; 
-        2: b_alu = ac | b; 
-        3: b_alu = ac ^ b; 
-        4: b_alu = ac + b; 
-        5: b_alu = ac - b;
-        default: b_alu = b;
+        /* AND  */ 1: alu = ac & b;
+        /* OR   */ 2: alu = ac | b;
+        /* EOR  */ 3: alu = ac ^ b;
+        /* ADD  */ 4: alu = ac + b;
+        /* SUB  */ 5: alu = ac - b;
+        /* LOAD */ default: alu = b;
 
     endcase
 
@@ -125,32 +128,28 @@ always @(posedge clock) begin
         7: if (cond) pc <= {base, b};
 
         // aluOp (0-5)
-        default:
-        begin
+        default: case (mode)
 
-            // Запись обратно в регистры
-            case (mode)
+            0, 1, 2, 3: ac <= alu;
+            4: x <= alu;
+            5: y <= alu;
+            6, 7:
+            begin
 
-                0, 1, 2, 3:
-                   ac <= b_alu;
-                4: x  <= b_alu;
-                5: y  <= b_alu;
-                6, 7:
-                begin
+                // Инкремент X при особых условиях
+                if (mode == 7 && bus == 1)                
+                    x <= x + 1;
 
-                    if (mode == 7 && bus == 1)
-                        x <= x + 1;
+                // Запись содержимого AC на позитивном фронте
+                if (!out[6] && alu[6])
+                    outx <= ac;
 
-                    if (out[6] == 1'b0 && b_alu[6])
-                        outx <= ac;
-                        
-                    out <= b_alu;
+                // Запись в порт значения АЛУ
+                out <= alu;
 
-                end
-                
-            endcase
+            end
 
-        end
+        endcase
         
     endcase
 
