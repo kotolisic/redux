@@ -43,7 +43,7 @@ reg  [ 7:0] x       = 0;
 reg  [ 7:0] y       = 0;
 reg  [15:0] nextpc  = 1;
 
-initial begin pc = 0; vga = 0; outx = 0; ctrl = 0; end
+initial begin pc = 0; vga = 0; outx = 0; ctrl = 0; o_we = 0; w_addr = 0; o_data = 0; end
 
 // Вычисления
 // ---------------------------------------------------------------------
@@ -143,7 +143,7 @@ always @(posedge clock) begin
             endcase
 
             // Дополнительные конфигурации
-            if (bus == 1) ctrl <= b;
+            if (bus == 1) ctrl <= d;
 
         end
 

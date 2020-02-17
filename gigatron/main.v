@@ -21,25 +21,32 @@ reg  [15:0]  rom[65536]; // 64k, word
 reg  [ 7:0]  ram[32768]; // 32k, byte
 
 initial      $readmemh("rom.hex", rom, 0);
+initial      $readmemh("ram.hex", ram, 0);
 
-reg  [15:0] data_ir;
+reg  [15:0] data_ir     = 0;
 wire [15:0] address_pc;
+wire [14:0] r_addr;
+wire [14:0] w_addr;
+reg  [ 7:0] i_data;
 
 always @(posedge clock) begin
 
     // Чтение данных из ROM
     data_ir <= rom[ address_pc ];
 
+    // Чтение и запись в RAM
+    i_data <= ram[ r_addr ];
+    if (o_we) ram[ w_addr ] <= o_data;
+
 end
 
 // ---------------------------------------------------------------------
 wire [7:0]  inreg;
-wire [14:0] r_addr;
-wire [14:0] w_addr;
-wire [ 7:0] i_data;
 wire [ 7:0] o_data;
+wire        o_we;
 wire [ 7:0] outx;
 wire [ 7:0] vga;
+wire [ 7:0] ctrl;
 
 gigatron u1
 (
@@ -51,15 +58,16 @@ gigatron u1
 
     // Чтение и запись
     .r_addr (r_addr),
-    .w_addr (w_addr),
     .i_data (i_data),
+    .w_addr (w_addr),
     .o_data (o_data),
     .o_we   (o_we),
 
     // Ввод-вывода
     .inreg  (inreg),
     .vga    (vga),
-    .outx   (outx)
+    .outx   (outx),
+    .ctrl   (ctrl)
 );
 
 endmodule
