@@ -23,7 +23,7 @@ void Gigatron::procstart() {
             rom[i] = (rom[i] >> 8) | (rom[i] << 8);
 
         fclose(fp);
-        
+
     } else {
         printf("gigatron.rom not found");
         exit(1);

@@ -21,7 +21,7 @@ void Gigatron::vga_init() {
 
     row = 0;
     col = 0;
-    
+
     minRow = 27 + 8;        // v.backPorch + v.pulse
     maxRow = minRow + 480;  // v.visible
 
@@ -35,11 +35,11 @@ void Gigatron::vga_init() {
 void Gigatron::vga_tick() {
 
     uint8_t let_out = out;                  // cpu.out
-    uint8_t falling = vga_out & ~let_out;   // vga.out 
+    uint8_t falling = vga_out & ~let_out;   // vga.out
 
     // После 4 и более CPU циклов HSYNC увеличит row до 0
     if (falling & VSYNC) {
-        row = -1; 
+        row = -1;
     }
 
     if (falling & HSYNC) {
@@ -51,12 +51,12 @@ void Gigatron::vga_tick() {
 
     if ((row >= minRow && row < maxRow) &&
         (col >= minCol && col < maxCol)) {
-    
+
         uint8_t let_r = (let_out     ) & 3;
         uint8_t let_g = (let_out >> 2) & 3;
         uint8_t let_b = (let_out >> 4) & 3;
 
-        for (int i = 0; i < 4; i++) { 
+        for (int i = 0; i < 4; i++) {
             pset((col - minCol) + i, (row - minRow), (85*let_r)*65536 + (85*let_g)*256 + (85*let_b));
         }
     }
