@@ -119,9 +119,10 @@ void Gigatron::gamepad_press(SDL_Event event) {
         case 0x64: inReg &= ~BUTTON_LEFT; break;
         case 0x62: inReg &= ~BUTTON_DOWN; break;
         case 0x60: inReg &= ~BUTTON_UP; break;
-        case 0x1C: inReg &= ~BUTTON_START; break;
+        // Назначить спец. клавишам
         case 0x2C: inReg &= ~BUTTON_A; break;
         case 0x2D: inReg &= ~BUTTON_B; break;
+        case 0x1C: inReg &= ~BUTTON_START; break;
         case 0x2E: inReg &= ~BUTTON_SELECT; break;
     }
 }

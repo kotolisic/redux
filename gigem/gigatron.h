@@ -5,6 +5,12 @@
 static const uint8_t ZERO = 0x80;
 static const uint8_t VSYNC = 0x80;
 static const uint8_t HSYNC = 0x40;
+static const uint32_t SAMPLES_PER_SECOND = 44100;
+
+// AudioBuffer
+static int au_data_buffer[441*32];
+static int au_sdl_frame;
+static int au_cpu_frame;
 
 enum Buttons {
 
@@ -25,8 +31,9 @@ protected:
 
     int width, height;
 
-    SDL_Event    event;
-    SDL_Surface* sdl_screen;
+    SDL_Event       event;
+    SDL_Surface*    sdl_screen;
+    SDL_AudioSpec   audio_device;
 
     // CPU
     uint16_t rom[65536]; // 64k x 16
@@ -38,8 +45,12 @@ protected:
     // VGA
     int row, col,
         minRow, maxRow,
-        minCol, maxCol,
-        vga_out; 
+        minCol, maxCol,    
+        vga_out;
+
+    // Audio
+    int au_cycle, au_cpu_shift, au_sample_shift;
+
 
 public:
 
@@ -67,4 +78,8 @@ public:
     void     gamepad_press(SDL_Event event);
     void     gamepad_up(SDL_Event event);
     int      get_key(SDL_Event event);
+
+    // Audio
+    void    audio_init();
+    void    audio_tick();
 };

@@ -32,8 +32,9 @@ Gigatron::Gigatron(int w, int h, const char* caption) {
     SDL_WM_SetCaption(caption, 0);
 
     // Инициализация процессора
-    vga_init();
     procstart();
+    vga_init();
+    audio_init();    
 
     SDL_AddTimer(10, WindowTimer, NULL);
 }
@@ -69,8 +70,7 @@ void Gigatron::start() {
 
                         tick();
                         vga_tick();
-
-                        // tick_audio();
+                        audio_tick();
                     }
 
                     SDL_Flip(sdl_screen);
