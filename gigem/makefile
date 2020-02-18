@@ -9,7 +9,7 @@ all: $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) $(LIBS) -o gigatron
 	./gigatron
 
-%.o: %.cc avr.h
+%.o: %.cc gigatron.h
 	$(CC) $(CFLAGS) $(LIBS) $< -c -o $@
 
 clean:
