@@ -15,7 +15,7 @@ void Gigatron::procstart() {
     }
 }
 
-// Сброс процессора
+/** reset registers to power-on state */
 void Gigatron::reset() {
 
     pc      = 0;
@@ -28,7 +28,7 @@ void Gigatron::reset() {
     inReg   = 0xff; // active low!
 }
 
-// Один такт процессора -- одна инструкция
+/** advance simulation by one tick */
 void Gigatron::tick() {
 
     uint16_t let_pc = pc;
@@ -67,12 +67,12 @@ void Gigatron::tick() {
  * @param {number} d
  */
 void Gigatron::aluOp(uint8_t op, uint8_t mode, uint8_t bus, uint8_t d) {
-    
+
     uint8_t  b = 0, rising;
     uint16_t addr;
 
     switch (bus & 3) {
-        
+
         case 0:
             b = d;
             break;
@@ -169,7 +169,6 @@ void Gigatron::storeOp(uint8_t mode, uint8_t bus, uint8_t d) {
     }
 }
 
-
 /** perform a branch op
  * @param {number} mode
  * @param {number} bus
@@ -222,7 +221,7 @@ void Gigatron::branchOp(uint8_t mode, uint8_t bus, uint8_t d) {
 uint16_t Gigatron::address(uint8_t mode, uint8_t d) {
 
     uint16_t addr;
-    
+
     switch (mode & 7) {
         case 0:
         case 4:
