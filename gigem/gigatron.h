@@ -11,18 +11,26 @@ protected:
     SDL_Event    event;
     SDL_Surface* sdl_screen;
 
-    unsigned short rom[65536]; // 64k x 16
-    unsigned char  ram[32768]; // 32k x 8
+    uint16_t rom[65536]; // 64k x 16
+    uint8_t  ram[32768]; // 32k x 8
 
-    unsigned short pc, nextpc;
-    unsigned char  ac, x, y, out, outx, inReg;
+    uint16_t pc, nextpc;
+    uint8_t  ac, x, y, out, outx, inReg;
 
 public:
 
     Gigatron(int, int, const char*);
 
-    void start();
-    void reset();
-    void procstart();
-    void tick();
+    // Инициализация
+    void    start();
+    void    reset();
+    void    procstart();
+
+    // Исполнительное устройство
+    void     tick();
+    void     aluOp   (uint8_t op,   uint8_t mode, uint8_t bus, uint8_t d);
+    void     storeOp (uint8_t mode, uint8_t bus,  uint8_t d);
+    void     branchOp(uint8_t mode, uint8_t bus,  uint8_t d);
+    uint16_t addr    (uint8_t mode, uint8_t d);
+    uint16_t offset  (uint8_t bus,  uint8_t d);
 };

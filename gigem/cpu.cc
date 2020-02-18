@@ -29,16 +29,16 @@ void Gigatron::reset() {
 // Один такт процессора -- одна инструкция
 void Gigatron::tick() {
 
-    unsigned short let_pc = pc;
+    uint16_t let_pc = pc;
 
     pc     = nextpc;
     nextpc = (nextpc + 1) & 0xFFFF;
 
-    unsigned short ir   = rom[ let_pc ];
-    unsigned char  op   = (ir >> 13) & 0x0007;
-    unsigned char  mode = (ir >> 10) & 0x0007;
-    unsigned char  bus  = (ir >> 8) & 0x0003;
-    unsigned char  d    = (ir >> 0) & 0x00ff;
+    uint16_t ir   = rom[ let_pc ];
+    uint8_t  op   = (ir >> 13) & 0x0007;
+    uint8_t  mode = (ir >> 10) & 0x0007;
+    uint8_t  bus  = (ir >> 8) & 0x0003;
+    uint8_t  d    = (ir >> 0) & 0x00ff;
 
     switch (op) {
         case 0:
