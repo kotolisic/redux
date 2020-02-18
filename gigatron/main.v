@@ -41,7 +41,7 @@ always @(posedge clock) begin
 end
 
 // ---------------------------------------------------------------------
-wire [7:0]  inreg;
+wire [7:0]  inreg   = 8'hFF;
 wire [ 7:0] o_data;
 wire        o_we;
 wire [ 7:0] outx;

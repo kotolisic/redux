@@ -30,9 +30,12 @@ Gigatron::Gigatron(int w, int h, const char* caption) {
 
     sdl_screen = SDL_SetVideoMode(w, h, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
     SDL_WM_SetCaption(caption, 0);
+
+    // Инициализация процессора
+    procstart();
 }
 
-
+// Обработчик событий с окна
 void Gigatron::start() {
 
     int k, i, keyid, mk;
@@ -65,10 +68,10 @@ void Gigatron::start() {
                 }
 
                 // Вызывается по таймеру
-                case SDL_USEREVENT: 
-                
+                case SDL_USEREVENT:
+
                     SDL_Flip(sdl_screen);
-                    break;            
+                    break;
             }
         }
 
