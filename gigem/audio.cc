@@ -51,7 +51,7 @@ void Gigatron::audio_init() {
     SDL_PauseAudio(0);
 }
 
-// Один аудиотик
+// Один аудиотик (10 мс)
 void Gigatron::audio_tick() {
 
     int let_sample = (outx >> 4);

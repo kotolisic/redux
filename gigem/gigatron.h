@@ -45,7 +45,7 @@ protected:
     // VGA
     int row, col,
         minRow, maxRow,
-        minCol, maxCol,    
+        minCol, maxCol,
         vga_out;
 
     // Audio
