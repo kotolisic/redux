@@ -13,6 +13,21 @@ void Gigatron::procstart() {
     for (int i = 0; i < 32768; i++) {
         ram[i] = rand() % 256;
     }
+
+    // Загрузка ROM
+    FILE* fp = fopen("gigatron.rom", "rb");
+    if (fp) {
+
+        fread(rom, 2, 65536, fp);
+        for (int i = 0; i < 65536; i++)
+            rom[i] = (rom[i] >> 8) | (rom[i] << 8);
+
+        fclose(fp);
+        
+    } else {
+        printf("gigatron.rom not found");
+        exit(1);
+    }
 }
 
 /** reset registers to power-on state */
