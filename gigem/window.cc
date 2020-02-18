@@ -32,13 +32,14 @@ Gigatron::Gigatron(int w, int h, const char* caption) {
     SDL_WM_SetCaption(caption, 0);
 
     // Инициализация процессора
+    vga_init();
     procstart();
+
+    SDL_AddTimer(10, WindowTimer, NULL); 
 }
 
 // Обработчик событий с окна
 void Gigatron::start() {
-
-    int k, i, keyid, mk;
 
     while (1) {
 
@@ -70,11 +71,26 @@ void Gigatron::start() {
                 // Вызывается по таймеру
                 case SDL_USEREVENT:
 
+                    for (int i = 0; i < 62500; i++) {
+
+                        tick();
+                        vga_tick();
+                        
+                        // tick_audio();
+                    }
+
                     SDL_Flip(sdl_screen);
                     break;
             }
         }
 
         SDL_Delay(1);
+    }
+}
+
+void Gigatron::pset(int x, int y, uint32_t color) {
+
+    if (x >= 0 && y >= 0 && x < width && y < height) {
+        ( (Uint32*)sdl_screen->pixels )[ x + width*y ] = color;
     }
 }
