@@ -7,6 +7,8 @@
 void Gigatron::procstart() {
 
     reset();
+    ramMask = 0x7fff;
+
     srand( static_cast<unsigned int> (time(0)) );
     for (int i = 0; i < 32768; i++) {
         ram[i] = rand() % 256;
@@ -47,13 +49,217 @@ void Gigatron::tick() {
         case 3:
         case 4:
         case 5:
-            // this.aluOp(op, mode, bus, d);
+            aluOp(op, mode, bus, d);
             break;
         case 6:
-            // this.storeOp(mode, bus, d);
+            storeOp(mode, bus, d);
             break;
         case 7:
-            // this.branchOp(mode, bus, d);
+            branchOp(mode, bus, d);
             break;
     }
+}
+
+/** perform an alu op
+ * @param {number} op
+ * @param {number} mode
+ * @param {number} bus
+ * @param {number} d
+ */
+void Gigatron::aluOp(uint8_t op, uint8_t mode, uint8_t bus, uint8_t d) {
+    
+    uint8_t  b = 0, rising;
+    uint16_t addr;
+
+    switch (bus & 3) {
+        
+        case 0:
+            b = d;
+            break;
+        case 1:
+            b = ram[ address(mode, d) & ramMask ];
+            break;
+        case 2:
+            b = ac;
+            break;
+        case 3:
+            b = inReg;
+            break;
+    }
+
+    switch (op & 7) {
+        case 1:
+            b = ac & b;
+            break;
+        case 2:
+            b = ac | b;
+            break;
+        case 3:
+            b = ac ^ b;
+            break;
+        case 4:
+            b = (ac + b) & 0xff;
+            break;
+        case 5:
+            b = (ac - b) & 0xff;
+            break;
+    }
+
+    switch (mode & 7) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+            ac = b;
+            break;
+        case 4:
+            x = b;
+            break;
+        case 5:
+            y = b;
+            break;
+        case 6:
+        case 7:
+            rising = ~out & b;
+            out = b;
+
+            // rising edge of out[6] registers outx from ac
+            if (rising & 0x40) {
+                outx = ac;
+            }
+
+            break;
+    }
+}
+
+/** perform a store op
+ * @param {number} mode
+ * @param {number} bus
+ * @param {number} d
+ */
+void Gigatron::storeOp(uint8_t mode, uint8_t bus, uint8_t d) {
+
+    uint8_t b = 0;
+
+    switch (bus & 3) {
+        case 0:
+            b = d;
+            break;
+        case 1:
+            b = 0;
+            // console.error('UNDEFINED BEHAVIOR!');
+            break;
+        case 2:
+            b = ac;
+            break;
+        case 3:
+            b = inReg;
+            break;
+    }
+
+    ram[ address(mode, d) & ramMask ] = b;
+
+    switch (mode) {
+        case 4: // XXX not clear whether x++ mode takes priority
+            x = b;
+            break;
+        case 5:
+            y = b;
+            break;
+    }
+}
+
+
+/** perform a branch op
+ * @param {number} mode
+ * @param {number} bus
+ * @param {number} d
+ */
+void Gigatron::branchOp(uint8_t mode, uint8_t bus, uint8_t d) {
+
+    uint8_t  c = 0;
+    uint8_t  let_ac = ac ^ ZERO;
+    uint16_t base   = pc & 0xff00;
+
+    switch (mode) {
+        case 0: // jmp
+            c = 1;
+            base = y << 8;
+            break;
+        case 1: // bgt
+            c = let_ac > ZERO;
+            break;
+        case 2: // blt
+            c = let_ac < ZERO;
+            break;
+        case 3: // bne
+            c = let_ac != ZERO;
+            break;
+        case 4: // beq
+            c = let_ac == ZERO;
+            break;
+        case 5: // bge
+            c = let_ac >= ZERO;
+            break;
+        case 6: // ble
+            c = let_ac <= ZERO;
+            break;
+        case 7: // bra
+            c = 1;
+            break;
+    }
+
+    if (c) {
+        nextpc = base | (offset(bus, d));
+    }
+}
+
+/** calculate a ram address
+ * @param {number} mode
+ * @param {number} d
+ * @return {number} the address
+ */
+uint16_t Gigatron::address(uint8_t mode, uint8_t d) {
+
+    uint16_t addr;
+    
+    switch (mode & 7) {
+        case 0:
+        case 4:
+        case 5:
+        case 6:
+            return d;
+        case 1:
+            return x;
+        case 2:
+            return (y << 8) | d;
+        case 3:
+            return (y << 8) | x;
+        case 7:
+            addr = (y << 8) | x;
+            x = (x + 1) & 0xff;
+            return addr;
+    }
+    return 0;
+}
+
+/** calculate a branch page offset
+ * @param {number} bus
+ * @param {number} d
+ * @return {number} page offset
+ */
+uint16_t Gigatron::offset(uint8_t bus, uint8_t d) {
+
+    switch (bus & 3) {
+        case 0:
+            return d;
+        case 1:
+            // RAM always has at least 1 page, so no need to mask address
+            return ram[d];
+        case 2:
+            return ac;
+        case 3:
+            return inReg;
+    }
+    return 0;
 }
