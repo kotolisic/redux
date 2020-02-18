@@ -7,10 +7,10 @@
 void Gigatron::procstart() {
 
     reset();
-    ramMask = 0x7fff;
+    ramMask = 0xffff;
 
     srand( static_cast<unsigned int> (time(0)) );
-    for (int i = 0; i < 32768; i++) {
+    for (int i = 0; i < 65536; i++) {
         ram[i] = rand() % 256;
     }
 

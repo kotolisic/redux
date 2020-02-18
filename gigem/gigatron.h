@@ -37,7 +37,7 @@ protected:
 
     // CPU
     uint16_t rom[65536]; // 64k x 16
-    uint8_t  ram[32768]; // 32k x 8
+    uint8_t  ram[65536]; // 64k x 8
     uint16_t pc, nextpc;
     uint16_t ramMask;
     uint8_t  ac, x, y, out, outx, inReg;

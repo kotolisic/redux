@@ -34,7 +34,7 @@ Gigatron::Gigatron(int w, int h, const char* caption) {
     // Инициализация процессора
     procstart();
     vga_init();
-    audio_init();    
+    audio_init();
 
     SDL_AddTimer(10, WindowTimer, NULL);
 }
