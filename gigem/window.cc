@@ -35,11 +35,13 @@ Gigatron::Gigatron(int w, int h, const char* caption) {
     vga_init();
     procstart();
 
-    SDL_AddTimer(10, WindowTimer, NULL); 
+    SDL_AddTimer(10, WindowTimer, NULL);
 }
 
 // Обработчик событий с окна
 void Gigatron::start() {
+
+    int keyid;
 
     while (1) {
 
@@ -55,18 +57,10 @@ void Gigatron::start() {
                     break;
 
                 // Нажата какая-то клавиша
-                case SDL_KEYDOWN: {
-
-                    // keyid = get_key(event);
-                    break;
-                }
+                case SDL_KEYDOWN: gamepad_press(event); break;
 
                 // Отпущена клавиша
-                case SDL_KEYUP: {
-
-                    // keyid = get_key(event);
-                    break;
-                }
+                case SDL_KEYUP: gamepad_up(event); break;
 
                 // Вызывается по таймеру
                 case SDL_USEREVENT:
@@ -75,7 +69,7 @@ void Gigatron::start() {
 
                         tick();
                         vga_tick();
-                        
+
                         // tick_audio();
                     }
 

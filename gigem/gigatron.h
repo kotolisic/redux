@@ -6,6 +6,19 @@ static const uint8_t ZERO = 0x80;
 static const uint8_t VSYNC = 0x80;
 static const uint8_t HSYNC = 0x40;
 
+enum Buttons {
+
+    BUTTON_A        = 0x80,
+    BUTTON_B        = 0x40,
+    BUTTON_SELECT   = 0x20,
+    BUTTON_START    = 0x10,
+    BUTTON_UP       = 0x08,
+    BUTTON_DOWN     = 0x04,
+    BUTTON_LEFT     = 0x02,
+    BUTTON_RIGHT    = 0x01
+};
+
+
 class Gigatron {
 
 protected:
@@ -49,4 +62,9 @@ public:
     void     vga_init();
     void     vga_tick();
     void     pset(int x, int y, uint32_t color);
+
+    // Gamepad
+    void     gamepad_press(SDL_Event event);
+    void     gamepad_up(SDL_Event event);
+    int      get_key(SDL_Event event);
 };
