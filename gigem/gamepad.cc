@@ -93,14 +93,14 @@ int Gigatron::get_key(SDL_Event event) {
         /* RT  */  case 0x72: xt = BUTTON_RIGHT; break;
         /* DN  */  case 0x74: xt = BUTTON_DOWN; break;
         /* LF  */  case 0x71: xt = BUTTON_LEFT; break;        
-        /* Home */ case 0x6E: xt = 0; break;
-        /* End  */ case 0x73: xt = 0; break;
+        /* Home */ case 0x6E: xt = BUTTON_B; break;
+        /* End  */ case 0x73: xt = BUTTON_START; break;
         /* PgUp */ case 0x70: xt = 0; break;
         /* PgDn */ case 0x75: xt = 0; break;    
-        /* Del  */ case 0x77: xt = 0x59; break;
-        /* Ins  */ case 0x76: xt = 0x5A; break;
-        /* NLock*/ case 0x4D: xt = 0x45; break;
-        /* Esc  */ case 0x08: xt = 0x01; break;
+        /* Del  */ case 0x77: xt = BUTTON_SELECT; break;
+        /* Ins  */ case 0x76: xt = BUTTON_A; break;
+        /* NLock*/ case 0x4D: xt = 0; break;
+        /* Esc  */ case 0x08: xt = 0; break;
 
         default: return 0;
     }
@@ -114,5 +114,7 @@ void Gigatron::gamepad_press(SDL_Event event) {
 }
 
 void Gigatron::gamepad_up(SDL_Event event) {
-    inReg |= get_key(event);
+
+    // inReg |= get_key(event);
+    inReg = 0xFF;
 }
